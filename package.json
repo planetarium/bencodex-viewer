@@ -1,0 +1,28 @@
+{
+  "name": "bencodex-viewer",
+  "version": "1.0.0",
+  "description": "Display a Bencodex tree on the web",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "keywords": [
+    "bencodex"
+  ],
+  "author": "Hong Minhee",
+  "license": " AGPL-3.0-or-later",
+  "devDependencies": {
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "bencodex": "^0.1.1",
+    "buffer": "^5.4.3",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-dropzone": "^10.2.1"
+  }
+}
