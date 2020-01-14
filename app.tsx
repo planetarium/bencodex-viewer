@@ -5,34 +5,37 @@ import { useDropzone } from 'react-dropzone'
 import { decode } from 'bencodex';
 import { Buffer } from 'buffer';
 
-function BencodexDropzone() {
+function BencodexViewer() {
     const [value, setValue] = useState(undefined);
     const onDrop = useCallback(acceptedFiles => {
-        const file = acceptedFiles[0];
-        file.arrayBuffer().then((aBuffer: ArrayBuffer) => {
-            const buffer: Buffer = Buffer.from(aBuffer);
-            setValue(decode(buffer));
-        });
+        if (acceptedFiles.length > 0) {
+            const file = acceptedFiles[0];
+            file.arrayBuffer().then((aBuffer: ArrayBuffer) => {
+                const buffer: Buffer = Buffer.from(aBuffer);
+                setValue(decode(buffer));
+            });
+        }
     }, []);
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop
     });
 
-    return (
+    return <>
         <div {...getRootProps()}>
             <input {...getInputProps()} />
-            {
-            isDragActive
-                ? <p>Drop the files here ...</p>
-                : typeof value == 'undefined'
-                    ? <p>Drag 'n' drop some files here, or click to select files</p>
-                    : <BencodexValue value={value} />
+            {isDragActive
+                ? <p>Drop the files here&hellip;</p>
+                : <p>Drag &amp; drop some files here, or click to select files</p>
             }
         </div>
-    );
+        {typeof value == 'undefined'
+            ? <></>
+            : <BencodexTree value={value} />
+        }
+    </>;
 }
 
-function BencodexValue({ value }) {
+function BencodexTree({ value }) {
     if (value === null) {
         return <div>null</div>;
     }
@@ -63,7 +66,7 @@ function BencodexValue({ value }) {
         </div>;
     }
     else if (value instanceof Array) {
-        return <div>{value.map(e => <BencodexValue value={e} />)}</div>;
+        return <div>{value.map(e => <BencodexTree value={e} />)}</div>;
     }
     else if (value instanceof Map) {
         // For readability, list dictionary keys in lexicographical order.
@@ -91,8 +94,8 @@ function BencodexValue({ value }) {
             <table>
                 {pairs.map(([k, v]) =>
                     <tr>
-                        <th><BencodexValue value={k} /></th>
-                        <td><BencodexValue value={v} /></td>
+                        <th><BencodexTree value={k} /></th>
+                        <td><BencodexTree value={v} /></td>
                     </tr>
                 )}
             </table>
@@ -105,4 +108,4 @@ function BencodexValue({ value }) {
     );
 }
 
-render(<BencodexDropzone />, document.getElementById('app'));
+render(<BencodexViewer />, document.getElementById('app'));
