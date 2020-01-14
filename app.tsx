@@ -36,17 +36,17 @@ function BencodexViewer() {
 }
 
 function BencodexTree({ value }) {
-    if (value === null) {
-        return <div>null</div>;
+    if (value == null && typeof value != 'undefined') {
+        return <div className="null">null</div>;
     }
     else if (typeof value == 'boolean') {
-        return <div>{value ? 'true' : 'false'}</div>;
+        return <div className="boolean">{value ? 'true' : 'false'}</div>;
     }
     else if (typeof value == 'bigint') {
-        return <div>{value}</div>;
+        return <div className="integer">{value.toString()}</div>;
     }
     else if (typeof value == 'string') {
-        return (<div>&quot;{value}&quot;</div>);
+        return (<div className="string">&quot;{value}&quot;</div>);
     }
     else if (value instanceof Uint8Array) {
         const hex = value.reduce(
@@ -54,7 +54,7 @@ function BencodexTree({ value }) {
             ''
         );
         const allAsciiChars = value.every(b => 0x20 <= b && b <= 0x7e);
-        return <div>
+        return <div className="binary">
             {hex}
             {allAsciiChars
                 ? <>
@@ -66,7 +66,15 @@ function BencodexTree({ value }) {
         </div>;
     }
     else if (value instanceof Array) {
-        return <div>{value.map(e => <BencodexTree value={e} />)}</div>;
+        return (
+            <table className="list">
+                <caption>
+                    {value.length}
+                    {value.length == 1 ? ' elements' : ' elements'}
+                </caption>
+                {value.map(e => <tr><td><BencodexTree value={e} /></td></tr>)}
+            </table>
+        );
     }
     else if (value instanceof Map) {
         // For readability, list dictionary keys in lexicographical order.
@@ -91,7 +99,11 @@ function BencodexTree({ value }) {
             return 0;
         });
         return (
-            <table>
+            <table className="dictionary">
+                <caption>
+                    {pairs.length}
+                    {pairs.length == 1 ? ' key' : ' keys'}
+                </caption>
                 {pairs.map(([k, v]) =>
                     <tr>
                         <th><BencodexTree value={k} /></th>
