@@ -4,8 +4,23 @@ import { render } from 'react-dom';
 import { useDropzone } from 'react-dropzone'
 import { decode } from 'bencodex';
 import { Buffer } from 'buffer';
+import styled from '@emotion/styled'
 
-function BencodexViewer() {
+const BencodexDropzone = styled.div`
+    border: 10px dashed silver;
+    border-radius: 10px;
+    color: gray;
+    font-family: sans-serif;
+    padding: 10px;
+    margin-bottom: 10px;
+    &[data-active=active] {
+        border-style: solid;
+        border-color: gray;
+        color: #333;
+    }
+`;
+
+const BencodexViewer = () => {
     const [value, setValue] = useState(undefined);
     const onDrop = useCallback(acceptedFiles => {
         if (acceptedFiles.length > 0) {
@@ -21,21 +36,98 @@ function BencodexViewer() {
     });
 
     return <>
-        <div {...getRootProps()}>
+        <BencodexDropzone
+            {...getRootProps()}
+            data-active={isDragActive ? 'active' : 'inactive'}>
+
             <input {...getInputProps()} />
             {isDragActive
-                ? <p>Drop the files here&hellip;</p>
-                : <p>Drag &amp; drop some files here, or click to select files</p>
+                ? <p>Drop the Bencodex file&hellip;</p>
+                : <p>Drag &amp; drop a Bencodex file here,
+                    or click to select a file</p>
             }
-        </div>
+        </BencodexDropzone>
         {typeof value == 'undefined'
             ? <></>
             : <BencodexTree value={value} />
         }
     </>;
-}
+};
 
-function BencodexTree({ value }) {
+const BencodexUnicodeString = styled.span`
+    &:before { content: '\u201c'; }
+    &:after { content: '\u201d'; }
+    &:hover:after {
+        content: '\u201d (' attr(data-length) ')';
+    }
+`;
+
+const BencodexByteString = styled.span`
+    font-family: monospace;
+    .hex:hover:after {
+        content: ' (' attr(data-length) ')';
+    }
+    .ascii {
+        display: block;
+        font-family: monospace;
+        &:before { content: '(ASCII: "'; }
+        &:after { content: '")'; }
+        opacity: 0.7;
+    }
+`;
+
+const BencodexList = styled.table`
+    border: 1px solid transparent;
+    border-collapse: collapse;
+    &:hover {
+        border: 1px solid black;
+    }
+    caption {
+        background-color: #333;
+        color: white;
+    }
+    tr:nth-child(odd) {
+        background-color: #eee;
+    }
+    tr:nth-child(even) {
+        background-color: white;
+    }
+    tr:hover {
+        background-color: #ddd;
+    }
+    th {
+        font-weight: normal;
+        text-align: left;
+    }
+`;
+
+const BencodexDictionary = styled.table`
+    border: 1px solid transparent;
+    border-collapse: collapse;
+    &:hover {
+        border: 1px solid black;
+    }
+    caption {
+        background-color: #333;
+        color: white;
+    }
+    tr:nth-child(odd) {
+        background-color: #eee;
+    }
+    tr:nth-child(even) {
+        background-color: white;
+    }
+    tr:hover {
+        background-color: #ddd;
+    }
+    th {
+        font-weight: normal;
+        text-align: left;
+    }
+`;
+
+
+const BencodexTree = ({ value }) => {
     if (value == null && typeof value != 'undefined') {
         return <div className="null">null</div>;
     }
@@ -46,7 +138,9 @@ function BencodexTree({ value }) {
         return <div className="integer">{value.toString()}</div>;
     }
     else if (typeof value == 'string') {
-        return (<div className="string">&quot;{value}&quot;</div>);
+        return <BencodexUnicodeString data-length={value.length}>
+            {value}
+        </BencodexUnicodeString>;
     }
     else if (value instanceof Uint8Array) {
         const hex = value.reduce(
@@ -54,26 +148,35 @@ function BencodexTree({ value }) {
             ''
         );
         const allAsciiChars = value.every(b => 0x20 <= b && b <= 0x7e);
-        return <div className="binary">
-            {hex}
+        return <BencodexByteString>
+            <span className="hex" data-length={value.byteLength}>
+                {hex}
+            </span>
             {allAsciiChars
                 ? <>
-                    <br />
-                    <span>&quot;{
+                    {' '}
+                    <span className="ascii">{
                         String.fromCharCode.apply(null, value)
-                    }&quot;</span></>
+                    }</span></>
                 : <></>}
-        </div>;
+        </BencodexByteString>;
     }
     else if (value instanceof Array) {
         return (
-            <table className="list">
+            <BencodexList>
                 <caption>
                     {value.length}
                     {value.length == 1 ? ' elements' : ' elements'}
                 </caption>
-                {value.map(e => <tr><td><BencodexTree value={e} /></td></tr>)}
-            </table>
+                <tbody>
+                    {value.map((e, i) =>
+                        <tr>
+                            <th>{i}</th>
+                            <td><BencodexTree value={e} /></td>
+                        </tr>
+                    )}
+                </tbody>
+            </BencodexList>
         );
     }
     else if (value instanceof Map) {
@@ -99,18 +202,20 @@ function BencodexTree({ value }) {
             return 0;
         });
         return (
-            <table className="dictionary">
+            <BencodexDictionary>
                 <caption>
                     {pairs.length}
                     {pairs.length == 1 ? ' key' : ' keys'}
                 </caption>
-                {pairs.map(([k, v]) =>
-                    <tr>
-                        <th><BencodexTree value={k} /></th>
-                        <td><BencodexTree value={v} /></td>
-                    </tr>
-                )}
-            </table>
+                <tbody>
+                    {pairs.map(([k, v]) =>
+                        <tr>
+                            <th><BencodexTree value={k} /></th>
+                            <td><BencodexTree value={v} /></td>
+                        </tr>
+                    )}
+                </tbody>
+            </BencodexDictionary>
         );
     }
 
@@ -118,6 +223,6 @@ function BencodexTree({ value }) {
         'expected one of: null, boolean, bigint, string, Array, Uint8Array, ' +
         'and Map'
     );
-}
+};
 
 render(<BencodexViewer />, document.getElementById('app'));
