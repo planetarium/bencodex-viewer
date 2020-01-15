@@ -149,7 +149,8 @@ const BencodexTree = ({ value }) => {
         const hex = [];
         value.forEach((b, i) =>
             hex.push(
-                <span className={highlightedIndex === i ? 'h' : ''}
+                <span key={i}
+                    className={highlightedIndex === i ? 'h' : ''}
                     onMouseEnter={() => highlightIndex(i)}
                     onMouseLeave={() => highlightIndex(null)}>{
                     (b < 0x10 ? '0' : '') + b.toString(16)
@@ -163,7 +164,8 @@ const BencodexTree = ({ value }) => {
                 ? <>
                     {' '}
                     <span className="ascii">{Array.from(value).map((b, i) =>
-                        <span className={highlightedIndex === i ? 'h' : ''}
+                        <span key={i}
+                            className={highlightedIndex === i ? 'h' : ''}
                             onMouseEnter={() => highlightIndex(i)}
                             onMouseLeave={() => highlightIndex(null)}>{
                             String.fromCharCode(b)
@@ -181,7 +183,7 @@ const BencodexTree = ({ value }) => {
                 </caption>
                 <tbody>
                     {value.map((e, i) =>
-                        <tr>
+                        <tr key={i}>
                             <th>{i}</th>
                             <td><BencodexTree value={e} /></td>
                         </tr>
@@ -219,8 +221,8 @@ const BencodexTree = ({ value }) => {
                     {pairs.length == 1 ? ' key' : ' keys'}
                 </caption>
                 <tbody>
-                    {pairs.map(([k, v]) =>
-                        <tr>
+                    {pairs.map(([k, v], i) =>
+                        <tr key={i}>
                             <th><BencodexTree value={k} /></th>
                             <td><BencodexTree value={v} /></td>
                         </tr>
