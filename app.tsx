@@ -64,6 +64,7 @@ const BencodexUnicodeString = styled.span`
 
 const BencodexByteString = styled.span`
     font-family: monospace;
+    .hex span { margin-right: 0.2em; }
     .hex:hover:after {
         content: ' (' attr(data-length) ')';
     }
@@ -143,15 +144,13 @@ const BencodexTree = ({ value }) => {
         </BencodexUnicodeString>;
     }
     else if (value instanceof Uint8Array) {
-        const hex = value.reduce(
-            (s, b) => s + (b < 0x10 ? '0' : '') + b.toString(16),
-            ''
+        const hex = [];
+        value.forEach(b =>
+            hex.push(<span>{(b < 0x10 ? '0' : '') + b.toString(16)}</span>)
         );
         const allAsciiChars = value.every(b => 0x20 <= b && b <= 0x7e);
         return <BencodexByteString>
-            <span className="hex" data-length={value.byteLength}>
-                {hex}
-            </span>
+            <span className="hex" data-length={value.byteLength}>{hex}</span>
             {allAsciiChars
                 ? <>
                     {' '}
