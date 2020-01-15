@@ -75,6 +75,7 @@ const BencodexByteString = styled.span`
         &:after { content: '")'; }
         opacity: 0.7;
     }
+    .hex .h, .ascii .h { color: red; }
 `;
 
 const BencodexList = styled.table`
@@ -144,9 +145,16 @@ const BencodexTree = ({ value }) => {
         </BencodexUnicodeString>;
     }
     else if (value instanceof Uint8Array) {
+        const [highlightedIndex, highlightIndex] = useState(null);
         const hex = [];
-        value.forEach(b =>
-            hex.push(<span>{(b < 0x10 ? '0' : '') + b.toString(16)}</span>)
+        value.forEach((b, i) =>
+            hex.push(
+                <span className={highlightedIndex === i ? 'h' : ''}
+                    onMouseEnter={() => highlightIndex(i)}
+                    onMouseLeave={() => highlightIndex(null)}>{
+                    (b < 0x10 ? '0' : '') + b.toString(16)
+                }</span>
+            )
         );
         const allAsciiChars = value.every(b => 0x20 <= b && b <= 0x7e);
         return <BencodexByteString>
@@ -154,9 +162,13 @@ const BencodexTree = ({ value }) => {
             {allAsciiChars
                 ? <>
                     {' '}
-                    <span className="ascii">{
-                        String.fromCharCode.apply(null, value)
-                    }</span></>
+                    <span className="ascii">{Array.from(value).map((b, i) =>
+                        <span className={highlightedIndex === i ? 'h' : ''}
+                            onMouseEnter={() => highlightIndex(i)}
+                            onMouseLeave={() => highlightIndex(null)}>{
+                            String.fromCharCode(b)
+                        }</span>
+                    )}</span></>
                 : <></>}
         </BencodexByteString>;
     }
