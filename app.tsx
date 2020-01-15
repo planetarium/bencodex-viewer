@@ -88,10 +88,10 @@ const BencodexList = styled.table`
         background-color: #333;
         color: white;
     }
-    tr:nth-child(odd) {
+    tr:nth-of-type(odd) {
         background-color: #eee;
     }
-    tr:nth-child(even) {
+    tr:nth-of-type(even) {
         background-color: white;
     }
     tr:hover {
@@ -113,10 +113,10 @@ const BencodexDictionary = styled.table`
         background-color: #333;
         color: white;
     }
-    tr:nth-child(odd) {
+    tr:nth-of-type(odd) {
         background-color: #eee;
     }
-    tr:nth-child(even) {
+    tr:nth-of-type(even) {
         background-color: white;
     }
     tr:hover {
