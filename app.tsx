@@ -130,6 +130,8 @@ const BencodexDictionary = styled.table`
 
 
 const BencodexTree = ({ value }) => {
+    const [highlightedIndex, highlightIndex] = useState(null);
+
     if (value == null && typeof value != 'undefined') {
         return <div className="null">null</div>;
     }
@@ -145,7 +147,6 @@ const BencodexTree = ({ value }) => {
         </BencodexUnicodeString>;
     }
     else if (value instanceof Uint8Array) {
-        const [highlightedIndex, highlightIndex] = useState(null);
         const hex = [];
         value.forEach((b, i) =>
             hex.push(
