@@ -4,7 +4,8 @@ import { render } from 'react-dom';
 import { useDropzone } from 'react-dropzone'
 import { decode } from 'bencodex';
 import { Buffer } from 'buffer';
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
+import HexEditor from 'react-hex-editor';
 
 const BencodexDropzone = styled.div`
     border: 10px dashed silver;
@@ -147,6 +148,17 @@ const BencodexTree = ({ value }) => {
         </BencodexUnicodeString>;
     }
     else if (value instanceof Uint8Array) {
+        if (value.length > 100) {
+            return <HexEditor
+                showAscii
+                columns={0x10}
+                height={400}
+                rowHeight={22}
+                rows={0x10}
+                width={1000}
+                data={value}
+            />;
+        }
         const hex = [];
         value.forEach((b, i) =>
             hex.push(
