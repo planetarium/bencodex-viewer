@@ -13,6 +13,7 @@
   "author": "Hong Minhee",
   "license": " AGPL-3.0-or-later",
   "devDependencies": {
+    "@babel/helper-compilation-targets": "^7.8.4",
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
     "parcel-bundler": "^1.12.4",
